@@ -2,7 +2,7 @@ const app = () => document.getElementById("app");
 
 function cardHTML(i) {
   return `<a class="card" href="#/item/${i.id}">
-    <div class="img">${i.icon}</div>
+    <div class="img">${pic(i)}</div>
     <div class="c"><b>${i.name[lang]}</b><small>${i.city[lang]}</small></div>
   </a>`;
 }
@@ -35,7 +35,7 @@ function viewItem(id) {
   if (!i) return viewHome();
   app().innerHTML = `
     <button class="back" onclick="history.back()">${lang === "ar" ? "→" : "←"} ${t("back")}</button>
-    <div class="big">${i.icon}</div>
+    <div class="big">${pic(i)}</div>
     <h2>${i.name[lang]}</h2>
     <span class="badge">${t("available")}</span>
     <p class="muted">${i.city[lang]}</p>
@@ -68,4 +68,49 @@ function showToast(msg) {
 
 function viewSoon() {
   app().innerHTML = `<p class="empty">${t("soon")}</p>`;
+}
+
+const pic = i => (i.img ? `<img src="${i.img}" alt="">` : i.icon);
+
+function viewAdd() {
+  const opts = WILAYAS.map((w, n) => {
+    const [a, e] = w.split("|");
+    return `<option value="${n}">${lang === "ar" ? a : e}</option>`;
+  }).join("");
+  app().innerHTML = `
+  <h2>${t("addTitle")}</h2>
+  <form id="f" class="form">
+    <label>${t("photos")}<input type="file" id="ph" accept="image/*" multiple></label>
+    <div class="thumbs" id="th"></div>
+    <label>${t("name")} *<input id="nm" class="search"></label>
+    <label>${t("wilaya")} *<select id="wl" class="search"><option value="">${t("pickW")}</option>${opts}</select></label>
+    <label>${t("commune")}<input id="cm" class="search"></label>
+    <label>${t("desc")}<textarea id="ds" class="search" rows="3"></textarea></label>
+    <label>${t("keys")}<input id="ky" class="search"></label>
+    <button class="cta" type="submit">${t("publish")}</button>
+  </form>`;
+  let urls = [];
+  document.getElementById("ph").onchange = e => {
+    urls = [...e.target.files].slice(0, 5).map(f => URL.createObjectURL(f));
+    document.getElementById("th").innerHTML = urls.map(u => `<img src="${u}" alt="">`).join("");
+  };
+  document.getElementById("f").onsubmit = e => {
+    e.preventDefault();
+    const name = document.getElementById("nm").value.trim();
+    const w = document.getElementById("wl").value;
+    if (!name || w === "") return showToast(t("need"));
+    const [wa, we] = WILAYAS[w].split("|");
+    const cm = document.getElementById("cm").value.trim();
+    const desc = document.getElementById("ds").value.trim();
+    const tags = document.getElementById("ky").value.split(/[,،]/).map(x => x.trim()).filter(Boolean);
+    const item = {
+      id: Date.now(), icon: "🎁", img: urls[0] || "",
+      name: { ar: name, en: name },
+      city: { ar: wa + (cm ? "، " + cm : ""), en: we + (cm ? ", " + cm : "") },
+      desc: { ar: desc, en: desc }, tags: { ar: tags, en: tags }
+    };
+    ITEMS.unshift(item);
+    location.hash = "#/item/" + item.id;
+    showToast(t("added"));
+  };
 }
