@@ -10,7 +10,7 @@ function cardHTML(i) {
 function matches(i, q) {
   q = q.trim().toLowerCase();
   if (!q) return true;
-  const text = [i.name.ar, i.name.en, ...i.tags.ar, ...i.tags.en].join(" ").toLowerCase();
+  const text = [i.name.ar, i.name.en, i.city.ar, i.city.en, ...i.tags.ar, ...i.tags.en].join(" ").toLowerCase();
   return text.includes(q);
 }
 
