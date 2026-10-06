@@ -20,6 +20,7 @@ function route() {
   document.getElementById("sheet").hidden = true;
   if (h.startsWith("#/item/")) viewItem(Number(h.split("/")[2]));
   else if (h === "#/") viewHome();
+  else if (h === "#/add") viewAdd();
   else viewSoon();
   renderChrome();
   window.scrollTo(0, 0);
